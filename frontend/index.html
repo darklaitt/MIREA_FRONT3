@@ -4,31 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог товаров</title>
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Каталог товаров</h1>
     <div id="products" class="products-container"></div>
 
     <script>
-        fetch('http://localhost:3000/api/products')
-            .then(response => response.json())
-            .then(data => {
-                const productsContainer = document.getElementById('products');
-                data.forEach(product => {
-                    const productCard = document.createElement('div');
-                    productCard.className = 'card';
-                    productCard.innerHTML = `
-                        <h2 class="card-title">${product.name}</h2>
-                        <p class="card-description">${product.description}</p>
-                        <div class="card-footer">
-                            <span class="price">₽${product.price}</span>
-                            <button class="buy-button">Купить</button>
-                        </div>
-                    `;
-                    productsContainer.appendChild(productCard);
+        // Функция для загрузки и отображения товаров
+        function loadProducts() {
+            fetch('http://localhost:3000/api/products')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Полученные товары:', data); // Вывод данных в консоль для отладки
+                    const productsContainer = document.getElementById('products');
+                    productsContainer.innerHTML = ''; // Очищаем контейнер перед обновлением
+                    data.forEach(product => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'card';
+                        productCard.innerHTML = `
+                            <h2 class="card-title">${product.name}</h2>
+                            <p class="card-description">${product.description}</p>
+                            <div class="card-footer">
+                                <span class="price">₽${product.price}</span>
+                                <button class="buy-button">Купить</button>
+                            </div>
+                        `;
+                        productsContainer.appendChild(productCard);
+                    });
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке товаров:', error);
                 });
-            });
+        }
+
+        // Загружаем товары при загрузке страницы
+        loadProducts();
+
+        // Обновляем товары каждые 5 секунд
+        setInterval(loadProducts, 5000);
     </script>
 </body>
 </html>

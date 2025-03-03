@@ -31,7 +31,7 @@ app.use(bodyParser.json());
 
 // Загрузка данных из JSON-файла
 let products = [];
-const productsFilePath = './products.json';
+const productsFilePath = '../products.json';
 
 function loadProducts() {
     if (fs.existsSync(productsFilePath)) {
@@ -53,6 +53,22 @@ app.get('/api/products', (req, res) => {
 });
 
 // Добавить новый товар
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Добавить новый товар
+ *     description: Добавляет новый товар в список.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Product'
+ *     responses:
+ *       201:
+ *         description: Товар успешно добавлен.
+ */
 app.post('/api/products', (req, res) => {
     const { name, price, description, category } = req.body;
     const newProduct = {
@@ -63,11 +79,34 @@ app.post('/api/products', (req, res) => {
         category
     };
     products.push(newProduct);
-    saveProducts(); // Сохраняем изменения в файл
+    saveProducts();
     res.status(201).json(newProduct);
 });
 
 // Редактировать товар по ID
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Редактировать товар по ID
+ *     description: Редактирует существующий товар.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID товара.
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Product'
+ *     responses:
+ *       200:
+ *         description: Товар успешно обновлен.
+ */
 app.put('/api/products/:id', (req, res) => {
     const productId = parseInt(req.params.id);
     const product = products.find(p => p.id === productId);
@@ -77,7 +116,6 @@ app.put('/api/products/:id', (req, res) => {
         product.price = price !== undefined ? price : product.price;
         product.description = description !== undefined ? description : product.description;
         product.category = category !== undefined ? category : product.category;
-        saveProducts(); // Сохраняем изменения в файл
         res.json(product);
     } else {
         res.status(404).json({ message: 'Товар не найден' });
@@ -85,13 +123,56 @@ app.put('/api/products/:id', (req, res) => {
 });
 
 // Удалить товар по ID
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   delete:
+ *     summary: Удалить товар по ID
+ *     description: Удаляет товар из списка.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID товара.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Товар успешно удален.
+ */
 app.delete('/api/products/:id', (req, res) => {
     const productId = parseInt(req.params.id);
     products = products.filter(p => p.id !== productId);
-    saveProducts(); // Сохраняем изменения в файл
+    saveProducts();
     res.status(204).send();
 });
 
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Product:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: Уникальный идентификатор товара.
+ *         name:
+ *           type: string
+ *           description: Название товара.
+ *         price:
+ *           type: number
+ *           description: Цена товара.
+ *         description:
+ *           type: string
+ *           description: Описание товара.
+ *         category:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Категории товара.
+ */
 
 /**
  * @swagger
@@ -112,7 +193,6 @@ app.delete('/api/products/:id', (req, res) => {
 app.get('/api/products', (req, res) => {
     res.json(products);
 });
-
 
 // Запуск сервера
 app.listen(PORT, () => {
